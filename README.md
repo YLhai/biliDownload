@@ -1,10 +1,11 @@
 ## 安装
 
-1. 解压ffmpeg.zip到当前文件夹
+1. 解压ffmpeg.zip
+2. 将ffmpeg.exe放到bilidownload.py同文件夹下。
 
-2. 安装依赖
+3. 安装依赖
 ```bash
-pip install -r requsts.txtt
+pip install -r requirements.txtt
 
 ```
    
