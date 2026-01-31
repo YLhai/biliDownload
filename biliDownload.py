@@ -10,6 +10,7 @@ from threading import Thread
 
 main_end = False
 main_start=False
+stop_download = False  # ← 新增：下载停止标志
 width = 500
 height = 500
 model_c = [1]
@@ -27,6 +28,8 @@ path = './正在下载不要动我/'
 
 #退出确定
 def isquit():
+    global stop_download
+    stop_download = True  # ← 新增：设置停止标志
     del_files(path, path1)
     os._exit(0)
 def dataup():
@@ -52,7 +55,11 @@ def del_files(path, path1):
 
 # 视频下载
 def down_34(dict,path1=path1):
-    global text_name,text_state,text_num
+    global text_name,text_state,text_num,stop_download
+    if stop_download:  # ← 新增：开始前检查
+        text_state = "用户中断下载"
+        return
+
     page = requests.get(url=dict["url"], headers=headers).text
     text_state = '正在下载:'
     text_name = dict["name"]
@@ -161,7 +168,7 @@ def v_url(url_in, num, seat=(1, 1)):
                         v_details.append({'name': i["title"], 'url': url + i["bvid"]})
             except:
                 text_state = "下载出现不明错误！"
-    # 多集视频合集
+
     elif 'spm_id_from' in url_in:
         urlad = url_in.split('&p=')[0] + '&p='
         try:
@@ -207,12 +214,12 @@ def v_url(url_in, num, seat=(1, 1)):
                 text_state = "下载出现不明错误！"
                 text_state="下载出现不明错误！"
 
-
+    print(v_details)
     return v_details
 
 # 运行函数（url,下载数量）
 def run(list):
-    global text_state,text_name,text_num
+    global text_state,text_name,text_num,stop_download
 
     if not os.path.exists(path1):
         os.mkdir(path1)
@@ -225,6 +232,9 @@ def run(list):
         num = len(url_list)
     d = 0
     for i in url_list:
+        if stop_download:  # ← 新增：循环开始前检查
+            text_state = "用户中断下载"
+            break
         d += 1
         try:
             down_34(i)
@@ -290,9 +300,9 @@ def in_data(Url,num,seat):
             break
     # （url（必须参数）,下载数量（默认10)）
     return Urls,num,seat
-
+# 多个文件下载
 def main_batch(li):
-    global main_end
+    global main_end,stop_download
     if not os.path.exists(path):
         os.mkdir(path)
     if not os.path.exists(path1):
@@ -303,16 +313,22 @@ def main_batch(li):
     # # （url（必须参数）,下载数量（默认10)）
     global main_end
     for i in Urls:
+        if stop_download:  # ← 新增：URL循环前检查
+            break
         run((num, seat, i))
     main_end=True
 
+#单个文件夹下载
 def main_single(li):
-    global main_end,path1
+    global main_end,path1,stop_download
     path2='./singlevideo/'
     if not os.path.exists(path2):
         os.mkdir(path2)
     if not os.path.exists(path):
         os.mkdir(path)
+    if stop_download:  # ← 新增：开始前检查
+        main_end = True
+        return
     down_34({'url': li[0][0], 'name': time.strftime('%H%M%S', time.localtime())},path2)
     main_end=True
     del_files(path, '')
@@ -332,7 +348,13 @@ class Window:
         self.root.geometry(f'{self.width}x{self.height}+{self.w_seat[0]}+{self.w_seat[1]}')
         self.root.resizable(False,False)
         self.root.title("b站视频下载")
-        self.root.protocol("WM_DELETE_WINDOW", isquit)
+        self.root.protocol("WM_DELETE_WINDOW", self.window_close)
+
+    def window_close(self):
+        global stop_download
+        stop_download = True  # 设置停止标志
+        del_files(path, path1)  # 清理临时文件
+        self.root.destroy()  # 销毁窗口
 
     def run1(self):
         self.url = self.inp1.get()
@@ -490,6 +512,7 @@ class Window:
         self.root.mainloop()
 
 
+# 屏幕控制中间函数
 def main1():
     global li,main_start
     w = Window()
