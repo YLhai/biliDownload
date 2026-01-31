@@ -161,6 +161,18 @@ def v_url(url_in, num, seat=(1, 1)):
                         v_details.append({'name': i["title"], 'url': url + i["bvid"]})
             except:
                 text_state = "下载出现不明错误！"
+    # 多集视频合集
+    elif 'spm_id_from' in url_in:
+        urlad = url_in.split('&p=')[0] + '&p='
+        try:
+            cc = 0
+            for i in range(seat[1],seat[1]+num):
+                url = urlad + str(i)
+
+                v_details.append({'name': str(i), 'url': url})
+        except:
+                    text_state = "下载出现不明错误！"
+                    text_state = "下载出现不明错误！"
     # 主页型
     else:
 
