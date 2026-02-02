@@ -8,7 +8,8 @@
 pip install -r requirements.txtt
 
 ```
-   
+
+- 当然你可以直接下载编译好的可执行文件直接使用。
 
 ## 运行
 
