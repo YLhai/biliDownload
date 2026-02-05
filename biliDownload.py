@@ -168,7 +168,7 @@ def v_url(url_in, num, seat=(1, 1)):
                         v_details.append({'name': i["title"], 'url': url + i["bvid"]})
             except:
                 text_state = "下载出现不明错误！"
-
+    # 分集一个视频有多集
     elif 'spm_id_from' in url_in:
         urlad = url_in.split('&p=')[0] + '&p='
         try:
